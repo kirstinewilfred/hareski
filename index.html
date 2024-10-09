@@ -52,7 +52,7 @@
 </div>
 
 <!-- Output display -->
-<div id="output"></div>
+<div id="output" style="color: red;"></div>
 
 
 <script>
@@ -108,12 +108,14 @@
             }).join('\n'); // Join the results back into a string
 
             // Print content to screen
-            document.getElementById('output').innerText = outputText.trim();
+            const downloadName = isDetailed ? turNavn + '_komplet.tsv' : turNavn + '_kort.tsv';
+            const displayText = `Listen er downloaded til: ${downloadName}\nFind den i Overførsler/Download mappen`;
+            document.getElementById('output').innerText = displayText;
             // Create a blob with the outputText and trigger a download
             const blob = new Blob([outputText.trim()], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = isDetailed ? turNavn + '_komplet.txt' : turNavn + '_kort.txt';  // Name of the downloaded file
+            link.download = downloadName;  // Name of the downloaded file
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link); // Clean up after download
