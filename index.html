@@ -18,38 +18,106 @@
 </head>
 <body>
 <h1>Konverter en travelize "Deltagerliste" til en skiholdsliste</h1>
-<label for="inputText">Kopier hele teksten fra en travelize deltagerliste og sæt ind her </label><br>
-<input type="text" id="inputText" placeholder="Type something..." />
-<button onclick="convertToSkiTeam()">Konverter til skiholdsliste</button>
 
+<div style="display: flex; align-items: flex-start;">
+  <!-- Text area and checkbox section -->
+  <div style="flex: 1;">
+    <label for="inputText">Indsæt tekst her:</label><br>
+    <!-- Changed input field to textarea for multi-line input -->
+    <textarea id="inputText" rows="25" cols="100" placeholder="Sæt din deltagerliste her..."></textarea><br>
+
+    <label>
+      <input type="checkbox" id="detailedOutput"> Komplet skiniveaubeskrivelse
+    </label><br>
+    <button onclick="convertToSkiTeam()">Konverter til skiholdsliste</button>
+  </div>
+
+  <!-- Disclaimer section -->
+  <div id="disclaimer" style="margin-left: 50px; max-width: 600px;">
+    <p>
+      <strong>Instruktion:</strong><br>
+      Kopier hele teksten fra en travelize deltagerliste og sæt ind i tekstfeltet.<br><br>
+      Det kan gøres ved at trykke Ctrl-a, Ctrl-c, når du har hentet deltagerlisten fra din tur på Guide portal.<br><br>
+      Når du bruger denne konvertering, bliver deltagerlisten omdannet til en skiholdsliste, der viser navn, alder, ski- og snowboardniveau
+    </p>
+    <p>
+      <strong>Forbehold:</strong><br>
+      Hvis deltagerens data indeholder usædvanlige tegn eller linjeskift i kommentarfeltet, kan nogle informationer muligvis ikke blive korrekt identificeret.<br>
+      Så må du selv rette den færdige liste til efterfølgende.<br><br>
+      Dette er et script som er lavet på en eftermiddag og vedligholdes meget sporadisk. Det er <b>dit eget ansvar</b> at tjekke at listen er korrekt. <br><br>
+      På Travelizes side angives hvor mange deltagere der er. Tjek at antallet af rækker passer med antal pax på deltagerlisten.<br><br>
+      Nikolaj Winther og Kirstine Wilfred Christensen
+    </p>
+  </div>
+</div>
+
+<!-- Output display -->
 <div id="output"></div>
+
 
 <script>
         const convertToSkiTeam = () => {
             const inputText = document.getElementById('inputText').value;
-            const lines = inputText.split('\n').filter(line => line.trim() !== '');
+            const isDetailed = document.getElementById("detailedOutput").checked;
 
-            const outputText = lines.map(line => {
+            let lines = inputText.split('\n').filter(line => line.trim() !== '');
+            let turNavn = lines[2].match(/\(([^)]+)\)/)[1];
+            console.log(turNavn)
+            lines = lines.slice(6,-1);
+            let outputText = "Navn\tAlder\tSkiniveau\tSnowboardniveau\n";
+            // console.log(lines.length)
+            outputText += lines.map(line => {
                 const parts = line.split('\t');
-
+                // console.log(parts);
                 const name = parts[0]; // Name
                 const age = parts[2];  // Age
 
                 // Extract ski level and snowboard instruction from the long string at part[22]
-                const longInfo = parts[22] || '';
-                const skiLevelMatch = longInfo.match(/(Øvet Ski|Ekspert Ski)/);
-                const skiLevel = skiLevelMatch ? skiLevelMatch[0] : '';
+                const longInfo = parts[20] || '';
+                const infoParts = longInfo.split("1 x ");
+                // console.log(JSON.stringify(infoParts));
+                let skiLevel = "";
+                let snowboardLevel = "";
+                let skiInstruction = "";
+                let snowboardInstruction = "";
 
-                const snowboardInstructionMatch = longInfo.match(/(Ønsker ikke snowboardundervisning)/);
-                const snowboardInstruction = snowboardInstructionMatch ? snowboardInstructionMatch[0] : '';
-
-                // Construct the formatted string using template literals
-                return `${name}\t${age}\t${skiLevel}\t${snowboardInstruction}`;
+                // Loop through each element of the array
+                infoParts.forEach(item => {
+                  // Find ski level
+                  if (item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) Ski/)) {
+                    skiLevel = isDetailed ? item.replace(/, $/, "") : item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) Ski/)[0];
+                  }
+                  // Find snowboard level
+                  if (item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) SB/)) {
+                    snowboardLevel = isDetailed ? item.replace(/, $/, "") : item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) SB/)[0];
+                  }
+                  // Check for ski instruction preference
+                  if (item.includes("Ønsker ikke skiundervisning")) {
+                    skiLevel = item.replace(/, $/, "");
+                  }
+                  if (item.includes("På denne tur er jeg skiinstruktør")) {
+                    skiLevel = item.replace(/, $/, "");
+                  }
+                  // Check for snowboard instruction preference
+                  if (item.includes("Ønsker ikke snowboardundervisning")) {
+                    snowboardLevel = item;
+                  }
+                });
+                // return `${name};${age};${skiLevel};${snowboardLevel};${skiInstruction};${snowboardInstruction}`;
+                return `${name}\t${age}\t${skiLevel}\t${snowboardLevel}\t${skiInstruction}\t${snowboardInstruction}`;
             }).join('\n'); // Join the results back into a string
 
+            // Print content to screen
             document.getElementById('output').innerText = outputText.trim();
+            // Create a blob with the outputText and trigger a download
+            const blob = new Blob([outputText.trim()], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = isDetailed ? turNavn + '_komplet.txt' : turNavn + '_kort.txt';  // Name of the downloaded file
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link); // Clean up after download
         };
-
 </script>
 </body>
 </html>
