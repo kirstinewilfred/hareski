@@ -108,7 +108,7 @@
             }).join('\n'); // Join the results back into a string
 
             // Print content to screen
-            const downloadName = isDetailed ? turNavn + '_komplet.csv' : turNavn + '_kort.csv';
+            const downloadName = isDetailed ? turNavn + '_komplet.txt' : turNavn + '_kort.txt';
             const displayText = `Listen er downloaded til: ${downloadName}\nFind den i Overførsler/Download mappen`;
             document.getElementById('output').innerText = displayText;
             // Create a blob with the outputText and trigger a download
