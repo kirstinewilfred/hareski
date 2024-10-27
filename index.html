@@ -47,7 +47,7 @@
       <strong>Forbehold:</strong><br>
       Hvis deltagerens data indeholder usædvanlige tegn eller linjeskift i kommentarfeltet, kan nogle informationer muligvis ikke blive korrekt identificeret.<br>
       Så må du selv rette den færdige liste til efterfølgende.<br><br>
-      Dette er et script som er lavet på en eftermiddag og vedligeholdes meget sporadisk. Det er <b>dit eget ansvar</b> at tjekke, at listen er korrekt. <br><br>
+      Dette er et script som er lavet på en eftermiddag og vedligeholdes meget sporadisk. Det er <span style="color:red;font-weight:bold;">dit eget ansvar</span> at tjekke, at listen er korrekt. <br><br>
       På Travelizes side angives hvor mange deltagere der er. Tjek at antallet af rækker passer med antal Pax på deltagerlisten.<br><br>
       Nikolaj Winther og Kirstine Wilfred Christensen
     </p>
@@ -144,7 +144,7 @@
             // Print content to screen
             const turNavn = "skiholdsliste"
             const downloadName = isDetailed ? turNavn + '_komplet.txt' : turNavn + '_kort.txt';
-            const displayText = `Listen er downloaded til: ${downloadName}\nFind den i Overførsler/Download mappen`;
+            const displayText = `Listen downloades til: ${downloadName}\nFind den i Overførsler/Download mappen`;
             document.getElementById('output').innerText = displayText;
             // Create a blob with the outputText and trigger a download
             const blob = new Blob([outputText.trim()], { type: 'text/plain' });
