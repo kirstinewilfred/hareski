@@ -36,16 +36,19 @@
   <div id="disclaimer" style="margin-left: 50px; max-width: 600px;">
     <p>
       <strong>Instruktion:</strong><br>
-      Kopier hele teksten fra en travelize deltagerliste og sæt ind i tekstfeltet.<br><br>
-      Det kan gøres ved at trykke Ctrl-a, Ctrl-c, når du har hentet deltagerlisten fra din tur på Guide portal.<br><br>
-      Når du bruger denne konvertering, bliver deltagerlisten omdannet til en skiholdsliste, der viser navn, alder, ski- og snowboardniveau
+      Gå ind på Travelize og download et excelark med deltagerlisten (find link i bunden af deltagerlisten). <br><br>
+      Gå ind i excelarket og markér og kopier alle kolonner og rækker fra deltagerlisten. <br><br>
+      Når du bruger denne konvertering, bliver deltagerlisten omdannet til en skiholdsliste, der viser navn, alder, ski- og snowboardniveau.  <br><br>
+      Hvis du sætter hak i feltet "Komplet skiniveaubeskrivelse, får du den oprindelige lange tekst. Denne er velegnet til at sende til deltagere.  <br><br>
+      Hvis du undlader hak,  får du en kortere og sorterbar udgave af skiniveau, som bedre kan bruges af skiskolechefen til at sætte hold.  <br><br>
+        
     </p>
     <p>
       <strong>Forbehold:</strong><br>
       Hvis deltagerens data indeholder usædvanlige tegn eller linjeskift i kommentarfeltet, kan nogle informationer muligvis ikke blive korrekt identificeret.<br>
       Så må du selv rette den færdige liste til efterfølgende.<br><br>
-      Dette er et script som er lavet på en eftermiddag og vedligholdes meget sporadisk. Det er <b>dit eget ansvar</b> at tjekke at listen er korrekt. <br><br>
-      På Travelizes side angives hvor mange deltagere der er. Tjek at antallet af rækker passer med antal pax på deltagerlisten.<br><br>
+      Dette er et script som er lavet på en eftermiddag og vedligeholdes meget sporadisk. Det er <b>dit eget ansvar</b> at tjekke, at listen er korrekt. <br><br>
+      På Travelizes side angives hvor mange deltagere der er. Tjek at antallet af rækker passer med antal Pax på deltagerlisten.<br><br>
       Nikolaj Winther og Kirstine Wilfred Christensen
     </p>
   </div>
@@ -61,11 +64,14 @@
             const isDetailed = document.getElementById("detailedOutput").checked;
 
             let lines = inputText.split('\n').filter(line => line.trim() !== '');
-            let turNavn = lines[2].match(/\(([^)]+)\)/)[1];
-            console.log(turNavn)
-            lines = lines.slice(6,-1);
+            //remove first line if headline
+            if ( lines[0].match(/Navn.*Fødselsdato/) ){
+              lines = lines.slice(1);
+            }
+
+
             let outputText = "Navn\tAlder\tSkiniveau\tSnowboardniveau\n";
-            // console.log(lines.length)
+            console.log(lines.length)
             outputText += lines.map(line => {
                 const parts = line.split('\t');
                 // console.log(parts);
@@ -80,27 +86,55 @@
                 let snowboardLevel = "";
                 let skiInstruction = "";
                 let snowboardInstruction = "";
+                const skiLevelShortTranslation = {
+                  "Nybegynder Ski": "A Nybegynder Ski",
+                  "Begynder Ski": "B Begynder Ski",
+                  "Letøvet Ski": "C Letøvet Ski",
+                  "Øvet Ski": "D Øvet Ski",
+                  "Erfaren Ski": "E Erfaren Ski",
+                  "Ekspert Ski": "F Ekspert Ski",
+                  "Nybegynder SB": "G Nybegynder Snowboard",
+                  "Begynder SB": "H Begynder Snowboard",
+                  "Letøvet SB": "I Letøvet Snowboard",
+                  "Øvet SB": "J Øvet Snowboard",
+                  "Erfaren SB": "K Erfaren Snowboard",
+                  "Ekspert SB": "L Ekspert Snowboard",
+                }
 
                 // Loop through each element of the array
                 infoParts.forEach(item => {
                   // Find ski level
                   if (item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) Ski/)) {
-                    skiLevel = isDetailed ? item.replace(/, $/, "") : item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) Ski/)[0];
+                    //skiLevel = isDetailed ? item.replace(/, $/, "") : item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) Ski/)[0];
+                    if (isDetailed){
+                      skiLevel = item.replace(/, $/, "")
+                    } else {
+                      const skiLevelShort = item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) Ski/)[0];
+                      skiLevel = skiLevelShortTranslation[skiLevelShort]
+                    }
+
                   }
                   // Find snowboard level
                   if (item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) SB/)) {
-                    snowboardLevel = isDetailed ? item.replace(/, $/, "") : item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) SB/)[0];
+                    //snowboardLevel = isDetailed ? item.replace(/, $/, "") : item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) SB/)[0];
+                    if (isDetailed){
+                      snowboardLevel = item.replace(/, $/, "")
+                    } else {
+                      const snowboardLevelShort = item.match(/(Nybegynder|Begynder|Letøvet|Øvet|Erfaren|Ekspert) SB/)[0];
+                      snowboardLevel = skiLevelShortTranslation[snowboardLevelShort]
+                    }
                   }
                   // Check for ski instruction preference
                   if (item.includes("Ønsker ikke skiundervisning")) {
-                    skiLevel = item.replace(/, $/, "");
+                    skiLevel = isDetailed ? item.replace(/, $/, "") : "N Ønsker ikke skiundervisning";
+
                   }
                   if (item.includes("På denne tur er jeg skiinstruktør")) {
-                    skiLevel = item.replace(/, $/, "");
+                    skiLevel = isDetailed ? item.replace(/, $/, "") : "M instruktør/medhjælper";
                   }
                   // Check for snowboard instruction preference
                   if (item.includes("Ønsker ikke snowboardundervisning")) {
-                    snowboardLevel = item;
+                    snowboardLevel = isDetailed ? item : "O Ønsker ikke snowboardundervisning";
                   }
                 });
                 // return `${name};${age};${skiLevel};${snowboardLevel};${skiInstruction};${snowboardInstruction}`;
@@ -108,6 +142,7 @@
             }).join('\n'); // Join the results back into a string
 
             // Print content to screen
+            const turNavn = "skiholdsliste"
             const downloadName = isDetailed ? turNavn + '_komplet.txt' : turNavn + '_kort.txt';
             const displayText = `Listen er downloaded til: ${downloadName}\nFind den i Overførsler/Download mappen`;
             document.getElementById('output').innerText = displayText;
